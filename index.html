@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazy Loading with Random Data</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Lazy Loading with Random Data</h1>
+  </header>
+  <main>
+    <div id="results" class="result-container">
+      <!-- Placeholder div for smooth animation effect -->
+      <div class="placeholder"></div>
+    </div>
+  </main>
+
+  <script>
+    // Helper function to create a user card element
+    function createUserCard(userData) {
+      const userCard = document.createElement('div');
+      userCard.className = 'user-card';
+      userCard.innerHTML = `
+        <img src="${userData.picture.medium}" alt="User Image">
+        <h3>${userData.name.first} ${userData.name.last}</h3>
+        <p>Email: ${userData.email}</p>
+        <p>Phone: ${userData.phone}</p>
+      `;
+      return userCard;
+    }
+
+    // Function to fetch more random user data
+    function fetchMoreData() {
+      // Use Random User Generator API to fetch random user data
+      fetch('https://randomuser.me/api/?results=10')
+        .then(response => response.json())
+        .then(data => {
+          const resultsContainer = document.getElementById('results');
+          const userCardsFragment = document.createDocumentFragment();
+
+          data.results.forEach(userData => {
+            const userCard = createUserCard(userData);
+            userCardsFragment.appendChild(userCard);
+          });
+
+          resultsContainer.appendChild(userCardsFragment);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
+
+    // Function to check if the user has reached the bottom of the page
+    function isAtBottom() {
+      const body = document.body;
+      const html = document.documentElement;
+      const windowHeight = window.innerHeight;
+      const totalHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+      const scrollY = window.pageYOffset;
+
+      return (scrollY + windowHeight) >= (totalHeight - 200); // Load more data 200 pixels before reaching the absolute bottom
+    }
+
+    // Event listener to trigger lazy loading when the user scrolls
+    window.addEventListener('scroll', () => {
+      if (isAtBottom()) {
+        fetchMoreData();
+      }
+    });
+
+    // Initial loading of data
+    fetchMoreData();
+  </script>
+</body>
+</html>
